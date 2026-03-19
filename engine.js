@@ -8,10 +8,11 @@ function resolveProblem() {
   }
 
   const problem = identifyProblem(input);
+  const category = detectCategory(input);
 
-  const quick = generateQuickFix(problem);
-  const stabilize = generateStabilize(problem);
-  const permanent = generatePermanent(problem);
+  const quick = generateQuickFix(problem, category);
+  const stabilize = generateStabilize(problem, category);
+  const permanent = generatePermanent(problem, category);
 
   output.innerHTML = `
     <div class="card">
@@ -42,34 +43,144 @@ function resolveProblem() {
 }
 
 /* --------------------------
-   CORE ENGINE (v1 SIMPLE)
+   IDENTIFY (v1 clean)
 -------------------------- */
-
 function identifyProblem(input) {
-  // v1 = clean restatement (later we make this smarter)
-  return input;
+  return input.charAt(0).toUpperCase() + input.slice(1);
 }
 
-/* QUICK FIX */
-function generateQuickFix(problem) {
-  return {
-    action: "Take the fastest possible action to reduce immediate impact or discomfort.",
-    tradeoff: "Does not solve root cause. Likely temporary."
-  };
+/* --------------------------
+   CATEGORY DETECTION
+-------------------------- */
+function detectCategory(input) {
+  const text = input.toLowerCase();
+
+  if (text.includes("leak") || text.includes("water") || text.includes("pipe")) {
+    return "home";
+  }
+
+  if (text.includes("app") || text.includes("bug") || text.includes("crash") || text.includes("code")) {
+    return "software";
+  }
+
+  if (text.includes("tired") || text.includes("burnout") || text.includes("stress")) {
+    return "health";
+  }
+
+  if (text.includes("slow") || text.includes("wifi") || text.includes("internet")) {
+    return "network";
+  }
+
+  return "general";
 }
 
-/* STABILIZE */
-function generateStabilize(problem) {
-  return {
-    action: "Apply a more durable fix that reduces recurrence and buys time.",
-    tradeoff: "Improves stability but may not eliminate underlying issue."
-  };
+/* --------------------------
+   QUICK FIX
+-------------------------- */
+function generateQuickFix(problem, category) {
+  switch (category) {
+    case "home":
+      return {
+        action: "Stop the immediate issue (shut off source, contain damage, reduce spread).",
+        tradeoff: "Temporary control only. Problem likely returns."
+      };
+
+    case "software":
+      return {
+        action: "Disable or bypass the failing feature to stop disruption.",
+        tradeoff: "Functionality is reduced."
+      };
+
+    case "health":
+      return {
+        action: "Reduce load immediately (pause, rest, remove pressure).",
+        tradeoff: "Does not fix underlying cause."
+      };
+
+    case "network":
+      return {
+        action: "Move closer to signal or reset connection.",
+        tradeoff: "Short-term improvement only."
+      };
+
+    default:
+      return {
+        action: "Take the fastest step to reduce immediate impact.",
+        tradeoff: "Likely temporary and incomplete."
+      };
+  }
 }
 
-/* PERMANENT */
-function generatePermanent(problem) {
-  return {
-    action: "Identify and eliminate the root cause completely.",
-    tradeoff: "Requires more time, effort, or resources."
-  };
+/* --------------------------
+   STABILIZE
+-------------------------- */
+function generateStabilize(problem, category) {
+  switch (category) {
+    case "home":
+      return {
+        action: "Repair or replace the failing component locally.",
+        tradeoff: "May not address broader system wear."
+      };
+
+    case "software":
+      return {
+        action: "Add safeguards, validation, or constraints to prevent failure.",
+        tradeoff: "Improves reliability but not full solution."
+      };
+
+    case "health":
+      return {
+        action: "Restructure workload and remove unnecessary strain.",
+        tradeoff: "Requires ongoing discipline."
+      };
+
+    case "network":
+      return {
+        action: "Improve signal distribution (extender, router placement).",
+        tradeoff: "Partial fix depending on infrastructure."
+      };
+
+    default:
+      return {
+        action: "Apply a more stable fix that reduces recurrence.",
+        tradeoff: "Still may not eliminate root cause."
+      };
+  }
+}
+
+/* --------------------------
+   PERMANENT FIX
+-------------------------- */
+function generatePermanent(problem, category) {
+  switch (category) {
+    case "home":
+      return {
+        action: "Identify root failure and rebuild or replace the system correctly.",
+        tradeoff: "Higher cost and effort."
+      };
+
+    case "software":
+      return {
+        action: "Refactor the system to eliminate the root cause of failure.",
+        tradeoff: "Requires development time and testing."
+      };
+
+    case "health":
+      return {
+        action: "Redesign routines and boundaries to prevent recurring overload.",
+        tradeoff: "Behavior change required."
+      };
+
+    case "network":
+      return {
+        action: "Upgrade network hardware or reconfigure full setup.",
+        tradeoff: "Cost and setup time."
+      };
+
+    default:
+      return {
+        action: "Remove the root cause completely.",
+        tradeoff: "Requires more time and resources."
+      };
+  }
 }
