@@ -31,8 +31,8 @@ function resolveProblem() {
   const problem = identifyProblem(input);
   const category = detectCategory(input);
 
-  const memoryKey = buildMemoryKey(problem, category);
-  const memory = updateProblemMemory(memoryKey, problem, category);
+  const memoryKeys = buildMemoryKeys(problem, category, input);
+  const memory = updateProblemMemory(memoryKeys, problem, category);
 
   const quick = generateQuickFix(problem, category, input, memory, currentMode);
   const stabilize = generateStabilize(problem, category, input, memory, currentMode);
@@ -101,7 +101,7 @@ function detectCategory(input) {
     ]),
     network: scoreKeywords(text, [
       "wifi", "wi fi", "internet", "router", "signal", "connection", "lag",
-      "slow internet", "buffer", "streaming"
+      "slow internet", "buffer", "streaming", "back room", "bedroom"
     ]),
     health: scoreKeywords(text, [
       "burnout", "stressed", "stress", "overwhelmed", "tired", "exhausted",
@@ -151,24 +151,103 @@ function hasAny(text, words) {
 }
 
 /* --------------------------
-   MEMORY
+   MEMORY — SMARTER MATCHING
 -------------------------- */
-function buildMemoryKey(problem, category) {
-  return `${category}::${normalize(problem)}`;
+function buildMemoryKeys(problem, category, input) {
+  const raw = normalize(input);
+  const canonical = buildCanonicalProblem(raw, category);
+
+  return {
+    exact: `${category}::${normalize(problem)}`,
+    canonical: `${category}::${canonical}`
+  };
 }
 
-function updateProblemMemory(key, problem, category) {
+function buildCanonicalProblem(text, category) {
+  let canonical = text;
+
+  const replacements = [
+    [/\bwi fi\b/g, "wifi"],
+    [/\binternet\b/g, "wifi"],
+    [/\bconnection\b/g, "wifi"],
+    [/\bback room\b/g, "far_room"],
+    [/\bbed room\b/g, "bedroom"],
+    [/\bback bedroom\b/g, "far_room"],
+    [/\bbedroom\b/g, "far_room"],
+    [/\blaggy\b/g, "slow"],
+    [/\bsucks\b/g, "slow"],
+    [/\bterrible\b/g, "slow"],
+    [/\bcrashes\b/g, "crash"],
+    [/\bfreezes\b/g, "freeze"],
+    [/\bglitchy\b/g, "glitch"],
+    [/\buploading\b/g, "upload"],
+    [/\bleaking\b/g, "leak"],
+    [/\bdripping\b/g, "leak"],
+    [/\bpooped\b/g, "poop"],
+    [/\bshit\b/g, "poop"],
+    [/\btook a dump\b/g, "poop"],
+    [/\brug\b/g, "carpet"],
+    [/\bstressed out\b/g, "stressed"],
+    [/\bworn out\b/g, "burnout"],
+    [/\bexhausted\b/g, "burnout"],
+    [/\boverwhelemed\b/g, "burnout"]
+  ];
+
+  for (const [pattern, replacement] of replacements) {
+    canonical = canonical.replace(pattern, replacement);
+  }
+
+  canonical = canonical
+    .split(" ")
+    .filter(word => !isFillerWord(word, category))
+    .sort()
+    .join(" ")
+    .trim();
+
+  if (!canonical) {
+    canonical = category;
+  }
+
+  return canonical;
+}
+
+function isFillerWord(word, category) {
+  const common = new Set([
+    "a", "an", "the", "my", "is", "are", "was", "were", "to", "for", "of",
+    "and", "or", "in", "on", "at", "with", "it", "this", "that", "keeps",
+    "keep", "very", "really", "super", "pretty", "kind", "of", "just"
+  ]);
+
+  if (common.has(word)) return true;
+
+  const categoryFillers = {
+    network: new Set(["room", "house"]),
+    software: new Set(["app"]),
+    home: new Set(["under"]),
+    health: new Set(["feel", "feeling", "am", "im", "i"]),
+    clutter: new Set(["stuff"])
+  };
+
+  return categoryFillers[category]?.has(word) || false;
+}
+
+function updateProblemMemory(keys, problem, category) {
   const store = JSON.parse(localStorage.getItem("trilane_memory") || "{}");
+  const key = keys.canonical;
 
   if (!store[key]) {
     store[key] = {
       count: 0,
       problem,
-      category
+      category,
+      lastExact: keys.exact
     };
   }
 
   store[key].count += 1;
+  store[key].problem = problem;
+  store[key].lastExact = keys.exact;
+
   localStorage.setItem("trilane_memory", JSON.stringify(store));
 
   return store[key];
@@ -180,13 +259,13 @@ function updateProblemMemory(key, problem, category) {
 function generateEscalationMessage(memory, mode) {
   if (mode === "brutal") {
     if (memory.count === 1) return "No pattern yet.";
-    if (memory.count === 2) return "Same problem again.";
+    if (memory.count === 2) return "Same problem, different wording.";
     if (memory.count === 3) return "This is becoming your thing.";
     return "You keep revisiting this. Stop patching it and fix it.";
   }
 
   if (memory.count === 1) return "No repeat pattern detected yet.";
-  if (memory.count === 2) return "This has come up more than once.";
+  if (memory.count === 2) return "This appears to be the same problem showing up again.";
   if (memory.count === 3) return "A repeat pattern is forming.";
   return "It may be time to move beyond short-term fixes and address the root issue.";
 }
