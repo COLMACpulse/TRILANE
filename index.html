@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>DECISION ENGINE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #eee;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      background: #222;
+      color: #eee;
+      border: 1px solid #444;
+      padding: 10px;
+      font-size: 16px;
+      resize: none;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 12px 20px;
+      font-size: 16px;
+      background: #0a84ff;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .card {
+      margin-top: 20px;
+      padding: 15px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+    }
+
+    .section {
+      margin-bottom: 15px;
+    }
+
+    .label {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .tradeoff {
+      font-size: 13px;
+      color: #aaa;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>DECISION ENGINE</h1>
+  <p>Turn any problem into action.</p>
+
+  <textarea id="problemInput" placeholder="What's the problem?"></textarea>
+  <button onclick="resolveProblem()">Resolve</button>
+
+  <div id="output"></div>
+
+  <script src="engine.js"></script>
+</body>
+</html>
