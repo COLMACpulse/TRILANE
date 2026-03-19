@@ -1,6 +1,6 @@
 # TRILANE
 
-TRILANE is a minimal decision engine that converts any problem into three clear paths:
+TRILANE is a minimal decision engine that converts problems into three clear paths:
 
 - Quick Fix → immediate relief  
 - Stabilize → short-term control  
@@ -29,10 +29,10 @@ Most people get stuck between:
 - reacting too fast (quick fixes forever)
 - overbuilding perfect solutions
 
-TRILANE forces a third option:
+TRILANE creates a simple path forward:
 - act now
 - stabilize next
-- solve for real when ready
+- fix it for real
 
 ---
 
